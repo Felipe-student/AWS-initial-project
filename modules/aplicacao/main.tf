@@ -1,6 +1,6 @@
 data "aws_ami" "ubuntu" {
   most_recent = true
-    owners = []
+    owners = [099720109477]
   filter {
     name   = "name"
     values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
@@ -14,7 +14,7 @@ data "aws_ami" "ubuntu" {
 
 data "aws_ami" "ubuntu_2" {
   most_recent = true
-    owners = []
+    owners = [099720109477]
   filter {
     name = "name"
     values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
@@ -28,6 +28,7 @@ data "aws_ami" "ubuntu_2" {
 
 data "aws_ami" "windows"{
     most_recent = true
+    owners = [801119661308]
 
     filter{
         name = "windows_server"
@@ -36,7 +37,7 @@ data "aws_ami" "windows"{
 
     filter{
         name = "virtualization-type"
-        values = [hvm]
+        values = ["hvm"]
     }
 }
 
@@ -44,7 +45,7 @@ resource "aws_instance" "ec2_1" {
   ami = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   subnet_id = aws_subnet.dmz.id
-
+  vpc_security_group_ids = [aws_security_group.dmz]
   tags = {
     Name = "ec2-dmz"
   }
@@ -52,18 +53,20 @@ resource "aws_instance" "ec2_1" {
 
 resource "aws_instance" "ec2_2" {
     ami = data.aws_ami.ubuntu_2.id
-    instace_type = "t3.micro"
+    instance_type = "t3.micro"
     subnet_id = aws_subnet.bd.id
+    vpc_security_group_ids = [aws_security_group.app]
 
     tags = {
         Name = "ec2-bd"
     }
 }
 
-resource "aws_instace" "ec2_3"{
+resource "aws_instance" "ec2_3"{
     ami = data.aws_ami.windows.id
-    instace_type = "t3.micro"
+    instance_type = "t3.micro"
     subnet_id = aws_subnet.app.id
+    vpc_security_group_ids = [aws_security_group.bd]
 
     tags = {
         Name = "ec2-app"
@@ -95,7 +98,7 @@ resource "aws_vpc_security_group_egress_rule" "dmz_saida" {
 
 resource "aws_security_group" "app" {
   name = "app-security-group"
-  vpc_id = aws_vpc.main.vpc_id
+  vpc_id = aws_vpc.main.id
 
   tags = {
     Name = "app-security"
@@ -107,7 +110,7 @@ resource "aws_vpc_security_group_ingress_rule" "app-ssh" {
   from_port = 22
   ip_protocol = "tcp"
   to_port = 22
-  referenced_security_group_id = aws_security_group.dmz
+  referenced_security_group_id = aws_security_group.dmz.id
 }
 
 resource "aws_vpc_security_group_ingress_rule" "app-rdp" {
