@@ -1,5 +1,5 @@
 provider aws {
-    region = us-esat-1
+    region = us-east-1
 }
 
 resource "aws_vpc" "main" {
@@ -29,6 +29,6 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "nat_gateway" {
     allocation_id = aws_eip.nat.id
-    subnet_id = aws_subnet.dmz
+    subnet_id = aws_subnet.dmz.id
 }
 
