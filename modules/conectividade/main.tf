@@ -58,7 +58,7 @@ resource "aws_route_table" "app_rota" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.app_rota.id
+    gateway_id = aws_nat_gateway.nat_gateway.id
   }
 
   tags = {
