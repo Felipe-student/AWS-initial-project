@@ -107,10 +107,9 @@ resource "aws_security_group" "app" {
 
 resource "aws_vpc_security_group_ingress_rule" "app-ssh" {
   security_group_id = aws_security_group.app.id
-  from_port = 22
+  from_port = aws_security_group.dmz.id
   ip_protocol = "tcp"
   to_port = 22
-  referenced_security_group_id = aws_security_group.dmz.id
 }
 
 resource "aws_vpc_security_group_ingress_rule" "app-rdp" {
@@ -118,7 +117,6 @@ resource "aws_vpc_security_group_ingress_rule" "app-rdp" {
   from_port = 3389
   ip_protocol = "tcp"
   to_port = 3389
-  referenced_security_group_id = aws_security_group.dmz.id
 }
 
 resource "aws_vpc_security_group_egress_rule" "app-saida" {
@@ -138,7 +136,7 @@ resource "aws_security_group" "bd" {
 
 resource "aws_vpc_security_group_ingress_rule" "bd-linux" {
   security_group_id = aws_security_group.bd.id
-  from_port = 12555
+  from_port = aws_security_group.app.id
   ip_protocol = "tcp"
   to_port = 12555
 }
