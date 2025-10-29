@@ -1,4 +1,4 @@
-provider aws {
+provider "aws" {
     region = us-east-1
 }
 
@@ -32,23 +32,16 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "nat_gateway" {
     allocation_id = aws_eip.nat.id
-    subnet_id = aws_subnet.dmz.id
+    subnet_id = aws_subnet.app.id
 }
 
-resource "aws_internet_gateway" "main_igw" {
-  vpc_id = aws_vpc.main.id
-
-  tags = {
-    Name = "main-igw"
-  }
-}
 
 resource "aws_route_table" "dmz_rota" {
   vpc_id = aws_vpc.main.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.dmz_rota.id
+    gateway_id = aws_nat_gateway.nat_gateway.id
   }
   tags = {
     Name = "dmz-rota"
@@ -57,7 +50,7 @@ resource "aws_route_table" "dmz_rota" {
 
 resource "aws_route_table_association" "dmz_assoc" {
   subnet_id = aws_subnet.dmz.id
-  route_table_id = aws_route_table.dmz_rota
+  route_table_id = aws_route_table.dmz_rota.id
 }
 
 resource "aws_route_table" "app_rota" {
@@ -65,7 +58,7 @@ resource "aws_route_table" "app_rota" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat_gateway.id
+    gateway_id = aws_nat_gateway.app_rota.id
   }
 
   tags = {
@@ -75,7 +68,7 @@ resource "aws_route_table" "app_rota" {
 
 resource "aws_route_table_association" "app_assoc" {
   subnet_id = aws_subnet.app.id
-  route_table_id = aws_route_table.app_rota
+  route_table_id = aws_route_table.app_rota.id
 }
 
 resource "aws_route_table" "bd_rota" {
