@@ -28,11 +28,19 @@ resource "aws_subnet" "bd" {
 
 resource "aws_eip" "nat" {
     domain = "vpc"
+
+    depends_on = [  ]
+}
+
+resource "aws_internet_gateway" "igw" {
+    vpc_id = aws_vpc.vpc_id.id
 }
 
 resource "aws_nat_gateway" "nat_gateway" {
     allocation_id = aws_eip.nat.id
     subnet_id = aws_subnet.app.id
+
+    depends_on = [ aws_internet_gateway.igw ]
 }
 
 
@@ -48,7 +56,7 @@ resource "aws_route_table" "dmz_rota" {
   }
 }
 
-resource "aws_route_table_association" "dmz_assoc" {
+ resource "aws_route_table_association" "dmz_assoc" {
   subnet_id = aws_subnet.dmz.id
   route_table_id = aws_route_table.dmz_rota.id
 }
